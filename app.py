@@ -84,5 +84,10 @@ url_wa = f"https://api.whatsapp.com/send?phone=5491167877990&text={mensaje_wa.re
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"### [📲 Consultar por WhatsApp]({url_wa})")
-st.sidebar.write("Nota: Se pueden realizar otras opciones de pago de acuerdo a la necesidad de cada familia.") [cite: 6]
+
+# Nota: El texto debe ir sin etiquetas de "cite" dentro de las comillas
+st.sidebar.write("Nota: Se pueden realizar otras opciones de pago de acuerdo a la necesidad de cada familia.")
+
+
+
 
