@@ -8,15 +8,12 @@ st.markdown("""
     <style>
     .stMetric { background-color: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #eee; }
     .footer-text { font-size: 0.8rem; color: #6c757d; line-height: 1.4; }
-    @media print {
-        .no-print { display: none !important; }
-        .print-only { display: block !important; }
-    }
-    .print-only { display: none; }
+    .disclaimer { font-size: 0.75rem; color: #7f8c8d; text-align: justify; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+    @media print { .no-print { display: none !important; } }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Base de Datos
+# 2. Base de Datos (Villa Carlos Paz y San Pedro)
 data_cba = {
     "Programa": ["Córdoba 6 días en bus", "Córdoba 6 días en avión", "Córdoba 5 días en bus", "Córdoba 5 días en avión", "Córdoba 4 días en avión"],
     "Total": [690000, 840000, 570000, 720000, 600000],
@@ -39,10 +36,10 @@ with st.sidebar:
     st.markdown("---")
     destino = st.radio("DESTINO", ["VILLA CARLOS PAZ", "SAN PEDRO"])
     st.markdown("---")
-    seccion = st.selectbox("DETALLES DEL VIAJE", ["Planes y Costos", "Formulario de Preventa", "Hotelería", "Excursiones", "Seguridad"])
-
+    seccion = st.selectbox("DETALLES DEL VIAJE", ["Planes y Costos", "Formulario de Preventa", "Hotelería", "Excursiones"])
+    
     st.markdown("---")
-    st.markdown("""<div class="footer-text"><b>Oficinas CABA:</b> Av. Rivadavia 4532 (L. 10)<br><b>Oficinas Leloir:</b> Del Cimarrón 1846 (Of. 4)<br><b>Tel:</b> (011) 4847-6467 / 5609-6283</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="footer-text"><b>CABA:</b> Av. Rivadavia 4532 (L. 10)<br><b>Leloir:</b> Del Cimarrón 1846 (Of. 4)<br><b>WA:</b> (011) 5609-6283</div>""", unsafe_allow_html=True)
 
 # 4. Lógica de Contenido
 df = pd.DataFrame(data_cba if destino == "VILLA CARLOS PAZ" else data_sp)
@@ -64,8 +61,8 @@ if seccion == "Planes y Costos":
     st.dataframe(df_comp[["Programa", "Total", "Dif. Lista", "Contado", "Dif. Contado"]].style.format({"Total": "$ {:,.0f}", "Contado": "$ {:,.0f}", "Dif. Lista": "{:+,.0f}", "Dif. Contado": "{:+,.0f}"}), use_container_width=True)
 
 elif seccion == "Formulario de Preventa":
-    st.header("📝 Formulario de Selección de Plan")
-    st.write("Complete los datos para generar el comprobante de preventa.")
+    st.header("📝 Formulario de Preventa 2026/27")
+    st.write("Complete los datos del pasajero y tutores para generar el resumen de inscripción.")
     
     with st.form("form_impresion"):
         col1, col2 = st.columns(2)
@@ -80,58 +77,58 @@ elif seccion == "Formulario de Preventa":
         
         plan_elegido = st.selectbox("Plan de Pago Seleccionado", df["Programa"])
         v_p = df[df["Programa"] == plan_elegido].iloc[0]
-        
         metodo_pago = st.radio("Modalidad de Pago", ["Contado", "Plan Mixto (Cuotas Fijas + IPC)"])
         
-        submit = st.form_submit_button("Generar Vista de Impresión")
+        submit = st.form_submit_button("Generar Resumen para Impresión")
 
     if submit:
-        st.success("¡Formulario listo! Use el botón de abajo para imprimir o guardar como PDF.")
-        
         # Bloque de impresión (HTML)
         resumen_html = f"""
-        <div style="border: 2px solid #333; padding: 20px; font-family: sans-serif;">
-            <h2 style="text-align: center; color: #d32f2f;">COMPROBANTE DE PREVENTA 2026/27</h2>
+        <div style="border: 2px solid #333; padding: 20px; font-family: sans-serif; background-color: white;">
+            <h2 style="text-align: center; color: #d32f2f;">FICHA DE PREVENTA - SERRANO TURISMO</h2>
             <hr>
-            <h4>DATOS DEL ALUMNO</h4>
-            <p><b>Nombre:</b> {nombre_a} {apellido_a} | <b>DNI:</b> {dni_a}</p>
-            <p><b>Institución:</b> {colegio}</p>
-            <h4>DATOS DE TUTORES</h4>
-            <p><b>Padre/Tutor:</b> {padre} | <b>Madre/Tutora:</b> {madre}</p>
+            <p><b>Alumno:</b> {nombre_a} {apellido_a} | <b>DNI:</b> {dni_a} | <b>Colegio:</b> {colegio}</p>
+            <p><b>Tutores:</b> {padre} / {madre}</p>
             <hr>
-            <h4>DETALLE DEL VIAJE: {destino.upper()}</h4>
-            <p><b>Plan seleccionado:</b> {plan_elegido}</p>
-            <p><b>Modalidad:</b> {metodo_pago}</p>
-            <p><b>Inscripción/Reserva:</b> $ {v_p['Inscripcion']:,}</p>
-            <p><b>Valor de Referencia:</b> $ {v_p['Contado'] if metodo_pago == 'Contado' else v_p['Total']:,}</p>
+            <h4>DETALLE DEL VIAJE</h4>
+            <p><b>Destino:</b> {destino.upper()} | <b>Programa:</b> {plan_elegido}</p>
+            <p><b>Modalidad:</b> {metodo_pago} | <b>Inscripción:</b> $ {v_p['Inscripcion']:,}</p>
+            <p><b>Valor Referencial:</b> $ {v_p['Contado'] if metodo_pago == 'Contado' else v_p['Total']:,}</p>
             <br><br>
             <div style="display: flex; justify-content: space-between;">
-                <div style="border-top: 1px solid #000; width: 40%; text-align: center;"><p>Firma Padre/Madre</p></div>
+                <div style="border-top: 1px solid #000; width: 40%; text-align: center;"><p>Firma de Conformidad</p></div>
                 <div style="border-top: 1px solid #000; width: 40%; text-align: center;"><p>Serrano Turismo</p></div>
             </div>
         </div>
         """
         st.markdown(resumen_html, unsafe_allow_html=True)
-        st.button("🖨️ Click derecho en la página y elija 'Imprimir'", help="O presione Ctrl+P")
+        
+        # WhatsApp con datos del formulario
+        wa_data = f"PREVENTA: {nombre_a} {apellido_a} ({colegio}). Destino: {destino}. Plan: {plan_elegido}. Modalidad: {metodo_pago}."
+        url_wa_form = f"https://api.whatsapp.com/send?phone=5491167877990&text={wa_data.replace(' ', '%20')}"
+        st.markdown(f'<a href="{url_wa_form}" target="_blank"><button style="width:100%; background-color:#25D366; color:white; border:none; padding:10px; border-radius:5px; margin-top:10px;">📲 Enviar Ficha a Martín por WhatsApp</button></a>', unsafe_allow_html=True)
+        st.caption("Nota: Presione Ctrl+P (Windows) o Cmd+P (Mac) para imprimir esta ficha.")
+
+    # --- DISCLAIMER LEGAL ---
+    st.markdown("""
+    <div class="disclaimer">
+    <b>TÉRMINOS Y CONDICIONES PRELIMINARES:</b><br>
+    El presente documento reviste carácter de "Ficha de Preventa" y declaración de interés, no constituyendo por sí mismo un contrato de viaje estudiantil definitivo. 
+    La validez del plan de pagos y la reserva de la plaza están sujetas a: 1) La disponibilidad de cupos al momento de la ratificación. 2) La firma del Contrato de Adhesión bajo la normativa vigente de la Ley de Turismo Estudiantil. 3) El pago efectivo de la cuota de inscripción/inscripción detallada. 
+    Los valores expresados en el "Plan Mixto" son de carácter referencial y se ajustarán mensualmente según el Índice de Precios al Consumidor (IPC) informado por el INDEC, a partir de la cuota detallada en el plan elegido. Serrano Turismo se reserva el derecho de ajustar itinerarios por razones de fuerza mayor, garantizando siempre la calidad y seguridad de los servicios prestados.
+    </div>
+    """, unsafe_allow_html=True)
 
 elif seccion == "Hotelería":
-    st.header("Alojamiento")
+    st.header(f"Alojamiento - {destino}")
     if destino == "VILLA CARLOS PAZ":
-        st.write("Hoteles Parque y Capilla del Lago[cite: 1].")
+        st.write("- **Hoteles:** Parque y Capilla del Lago .\n- **Servicios:** Habitaciones con somier, aire acondicionado y baño privado[cite: 3].")
     else:
-        st.write("Hotel Turismo San Pedro - La Rueda[cite: 2].")
+        st.write("- **Hotel:** Turismo San Pedro (La Rueda) [cite: 2].\n- **Servicios:** Pileta climatizada exclusiva y amplios parques[cite: 2].")
 
 elif seccion == "Excursiones":
-    st.header("Actividades")
+    st.header(f"Experiencias - {destino}")
     if destino == "VILLA CARLOS PAZ":
-        st.write("- Peko's Multiparque [cite: 1]\n- Mundo Cocoguana [cite: 1]")
+        st.write("- **Parques:** Peko's Multiparque y Mundo Cocoguana [cite: 3].\n- **Noche:** Discotecas exclusivas y fiestas temáticas[cite: 3].")
     else:
-        st.write("- La Campiña de Mónica y César [cite: 2]\n- Vuelta al Obligado [cite: 2]")
-
-elif seccion == "Seguridad":
-    st.header("Cobertura")
-    st.write("Universal Assistance y App Viaxlab.")
-
-# WhatsApp Flotante
-msg = f"Hola Martín, envío datos de preventa para {destino}."
-st.sidebar.markdown(f"""<a href="https://api.whatsapp.com/send?phone=5491167877990&text={msg.replace(' ', '%20')}" target="_blank"><button style="width:100%; border-radius:10px; background-color:#25D366; color:white; border:none; padding:10px; cursor:pointer;">Enviar Consulta por WA</button></a>""", unsafe_allow_html=True)
+        st.write("- **Visitas:** La Campiña de Mónica y César y Vuelta al Obligado [cite: 2].\n- **Aventura:** Navegación por el Delta y safari fotográfico[cite: 2].")
