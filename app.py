@@ -4,20 +4,20 @@ import pandas as pd
 # Configuracion de la pagina
 st.set_page_config(page_title="Serrano Turismo 2025", layout="wide")
 
-# --- ENCABEZADO CON LOGO A LA DERECHA ---
+# --- ENCABEZADO CON LOGO ---
 col_titulo, col_logo = st.columns([4, 1])
 
 with col_titulo:
     st.title("Serrano Turismo - Comparador 2025")
 
 with col_logo:
-    # Usamos la URL de la imagen de tu Facebook/Web para asegurar que cargue
-    logo_url = "https://serranoturismo.com.ar/wp-content/uploads/2023/02/logo-serrano-turismo.png" 
+    # Usando el link directo proporcionado
+    logo_url = "https://serranoturismo.com.ar/assets/images/logoserrano-facebook.png"
     st.image(logo_url, width=150)
 
 st.markdown("---")
 
-# Datos del documento 
+# Datos oficiales del plan 2025
 data = {
     "Programa": [
         "Cordoba 6 dias en bus", "Cordoba 6 dias en avion", 
@@ -35,44 +35,54 @@ df = pd.DataFrame(data)
 
 # --- SECCION SUPERIOR: PLAN ELEGIDO ---
 st.subheader("⭐ Tu Plan Seleccionado")
-opcion = st.selectbox("Elige el plan que mas te interesa:", df["Programa"])
+opcion = st.selectbox("Elige el plan que mas te interesa para comparar:", df["Programa"])
 v = df[df["Programa"] == opcion].iloc[0]
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Precio Lista", f"$ {v['Total']:,}")
 c2.metric("Precio Contado", f"$ {v['Contado']:,}")
 c3.metric("6 Cuotas Fijas", f"$ {v['Cuota_6']:,}")
-c4.metric("Cuota Base IPC", f"$ {v['IPC_18']:,}")
+c4.metric("Inscripcion", f"$ {v['Inscripcion']:,}")
 
 st.divider()
 
-# --- SECCION INFERIOR: COMPARATIVA ---
-st.subheader("🔍 Comparativa con otras alternativas")
+# --- SECCION INFERIOR: TABLA DE DIFERENCIAS ---
+st.subheader("🔍 ¿Como se compara con otros planes?")
+st.write("Diferencias calculadas respecto a tu seleccion actual:")
 
-df_otros = df[df["Programa"] != opcion].copy()
-df_otros["Dif. Total"] = df_otros["Total"] - v["Total"]
-df_otros["Dif. Contado"] = df_otros["Contado"] - v["Contado"]
+# Crear copia para comparativa
+df_comp = df[df["Programa"] != opcion].copy()
 
-df_display = df_otros[["Programa", "Total", "Dif. Total", "Contado", "Dif. Contado"]]
+# Calcular diferencias (Elegido - Otro) para mostrar cuanto mas o menos cuesta
+df_comp["Diferencia Total"] = df_comp["Total"] - v["Total"]
+df_comp["Diferencia Contado"] = df_comp["Contado"] - v["Contado"]
 
-# Estilo de tabla con colores para diferencias
+# Seleccion de columnas para mostrar
+df_mostrar = df_comp[["Programa", "Total", "Diferencia Total", "Contado", "Diferencia Contado"]]
+
+# Formateo visual
 st.dataframe(
-    df_display.style.format({
+    df_mostrar.style.format({
         "Total": "$ {:,.0f}", 
         "Contado": "$ {:,.0f}",
-        "Dif. Total": "{:+,.0f}",
-        "Dif. Contado": "{:+,.0f}"
+        "Diferencia Total": "{:+,.0f}",
+        "Diferencia Contado": "{:+,.0f}"
     }).applymap(
-        lambda x: 'color: #d63031' if isinstance(x, (int, float)) and x > 0 
-        else 'color: #27ae60' if isinstance(x, (int, float)) and x < 0 
+        lambda x: 'background-color: #f8d7da; color: #721c24' if isinstance(x, (int, float)) and x > 0 
+        else 'background-color: #d4edda; color: #155724' if isinstance(x, (int, float)) and x < 0 
         else '', 
-        subset=["Dif. Total", "Dif. Contado"]
+        subset=["Diferencia Total", "Diferencia Contado"]
     ),
     use_container_width=True
 )
 
-st.info("💡 Los valores en verde indican cuanto ahorras respecto al plan seleccionado arriba.")
+st.info("💡 Los valores en verde indican planes mas economicos que el seleccionado arriba.")
 
-# Link de WhatsApp con el plan seleccionado [cite: 6]
+# Link de WhatsApp dinamico
+mensaje_wa = f"Hola Martin, estuve viendo el plan {opcion} en el comparador y me gustaria recibir mas info."
+url_wa = f"https://api.whatsapp.com/send?phone=5491167877990&text={mensaje_wa.replace(' ', '%20')}"
+
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"[¿Dudas? Habla con Martin por WhatsApp](https://api.whatsapp.com/send?phone=5491167877990&text=Hola%20Martin%20vi%20el%20plan%20{opcion.replace(' ', '%20')}%20y%20me%20gustaria%20consultarte)")
+st.sidebar.markdown(f"### [📲 Consultar por WhatsApp]({url_wa})")
+st.sidebar.write("Nota: Se pueden realizar otras opciones de pago de acuerdo a la necesidad de cada familia.") [cite: 6]
+
