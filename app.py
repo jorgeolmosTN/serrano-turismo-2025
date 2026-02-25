@@ -62,4 +62,6 @@ with t2:
     i2.warning(f"17 cuotas: $ {v['IPC_17']:,}")
     i3.warning(f"16 cuotas: $ {v['IPC_16']:,}")
 
-st.sidebar.info("Otras opciones de pago segun necesidad de la familia. ")
+# Reemplaza la ultima linea de tu codigo por esta:
+st.sidebar.markdown(f"[Otras opciones de pago segun necesidad de la familia.](https://api.whatsapp.com/send?phone=5491167877990&text=Hola%20Martin%20me%20gustaria%20armar%20un%20plan%20personalizado)")
+
