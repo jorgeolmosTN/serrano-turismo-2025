@@ -4,9 +4,20 @@ import pandas as pd
 # Configuracion de la pagina
 st.set_page_config(page_title="Serrano Turismo 2025", layout="wide")
 
-st.title("Serrano Turismo - Comparador de Planes 2025")
+# --- ENCABEZADO CON LOGO A LA DERECHA ---
+col_titulo, col_logo = st.columns([4, 1])
 
-# Datos extraidos del documento 
+with col_titulo:
+    st.title("Serrano Turismo - Comparador 2025")
+
+with col_logo:
+    # Usamos la URL de la imagen de tu Facebook/Web para asegurar que cargue
+    logo_url = "https://serranoturismo.com.ar/wp-content/uploads/2023/02/logo-serrano-turismo.png" 
+    st.image(logo_url, width=150)
+
+st.markdown("---")
+
+# Datos del documento 
 data = {
     "Programa": [
         "Cordoba 6 dias en bus", "Cordoba 6 dias en avion", 
@@ -37,31 +48,31 @@ st.divider()
 
 # --- SECCION INFERIOR: COMPARATIVA ---
 st.subheader("🔍 Comparativa con otras alternativas")
-st.write("Aqui puedes ver como varia el presupuesto segun el transporte o los dias de estadia.")
 
-# Filtrar los planes NO elegidos
 df_otros = df[df["Programa"] != opcion].copy()
-
-# Calcular diferencias respecto al elegido
 df_otros["Dif. Total"] = df_otros["Total"] - v["Total"]
 df_otros["Dif. Contado"] = df_otros["Contado"] - v["Contado"]
 
-# Formatear para mostrar
 df_display = df_otros[["Programa", "Total", "Dif. Total", "Contado", "Dif. Contado"]]
 
-# Mostrar tabla comparativa
+# Estilo de tabla con colores para diferencias
 st.dataframe(
     df_display.style.format({
         "Total": "$ {:,.0f}", 
         "Contado": "$ {:,.0f}",
         "Dif. Total": "{:+,.0f}",
         "Dif. Contado": "{:+,.0f}"
-    }).applymap(lambda x: 'color: red' if isinstance(x, (int, float)) and x > 0 else 'color: green' if isinstance(x, (int, float)) and x < 0 else '', subset=["Dif. Total", "Dif. Contado"]),
+    }).applymap(
+        lambda x: 'color: #d63031' if isinstance(x, (int, float)) and x > 0 
+        else 'color: #27ae60' if isinstance(x, (int, float)) and x < 0 
+        else '', 
+        subset=["Dif. Total", "Dif. Contado"]
+    ),
     use_container_width=True
 )
 
 st.info("💡 Los valores en verde indican cuanto ahorras respecto al plan seleccionado arriba.")
 
-# Link de WhatsApp al final
-st.sidebar.markdown(f"---")
-st.sidebar.markdown(f"[¿Dudas? Habla con Martin por WhatsApp](https://api.whatsapp.com/send?phone=5491167877990&text=Hola%20Martin%20vi%20el%20plan%20{opcion.replace(' ', '%20')}%20pero%20quiero%20armar%20algo%20personalizado)")
+# Link de WhatsApp con el plan seleccionado [cite: 6]
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"[¿Dudas? Habla con Martin por WhatsApp](https://api.whatsapp.com/send?phone=5491167877990&text=Hola%20Martin%20vi%20el%20plan%20{opcion.replace(' ', '%20')}%20y%20me%20gustaria%20consultarte)")
